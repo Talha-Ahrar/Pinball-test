@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinball Game</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: url('bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    #gameContainer {
+      position: relative;
+      width: 800px;
+      height: 600px;
+      border: 2px solid #000;
+   
+    }
+    canvas {
+      display: block;
+    
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #congratulations {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      font-weight: bold;
+      color: green;
+   
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="score">Score: 0</div>
+    <div id="congratulations">Congratulations! You've hit all targets!</div>
+  </div>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    const congratulationsElement = document.getElementById('congratulations');
+    
+    let score = 0;
+    const targets = [
+      { x: 100, y: 100, radius: 20 },
+      { x: 300, y: 200, radius: 20 },
+      { x: 500, y: 100, radius: 20 },
+      { x: 200, y: 400, radius: 20 },
+      { x: 600, y: 300, radius: 20 }
+    ];
+    let ball = { x: 400, y: 300, radius: 10, dx: 2, dy: -2 };
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#0095DD';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawTargets() {
+      targets.forEach(target => {
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.closePath();
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBall();
+      drawTargets();
+
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
+        ball.dx = -ball.dx;
+      }
+      if (ball.y + ball.dy > canvas.height - ball.radius || ball.y + ball.dy < ball.radius) {
+        ball.dy = -ball.dy;
+      }
+
+      targets.forEach((target, index) => {
+        const dist = Math.hypot(ball.x - target.x, ball.y - target.y);
+        if (dist - ball.radius - target.radius < 1) {
+          targets.splice(index, 1);
+          score += 10;
+          scoreElement.textContent = `Score: ${score}`;
+          alert('QR Code for Target ' + (index + 1)); // Show QR code alert (replace with actual QR code logic)
+        }
+      });
+
+      if (targets.length === 0) {
+        congratulationsElement.style.display = 'block';
+        clearInterval(gameInterval);
+      }
+    }
+
+    const gameInterval = setInterval(draw, 10);
+  </script>
+</body>
+</html>
